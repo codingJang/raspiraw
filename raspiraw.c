@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
@@ -368,11 +369,12 @@ static int i2c_rd(int fd, uint8_t i2c_addr, uint16_t reg, uint8_t *values, uint3
 	msgset.msgs = msgs;
 	msgset.nmsgs = 2;
 
-	err = ioctl(fd, I2C_RDWR, &msgset);
-	// vcos_log_error("Read i2c addr %02X, reg %04X (len %d), value %02X,
-	// err %d", i2c_addr, msgs[0].buf[0], msgs[0].len, values[0], err);
-	if (err != (int)msgset.nmsgs)
-		return -1;
+    err = ioctl(fd, I2C_RDWR, &msgset);
+    if (err != (int)msgset.nmsgs)
+    {
+        vcos_log_error("i2c_rd failed: addr %02X reg %04X len %u err %d", i2c_addr, reg, n, err);
+        return -1;
+    }
 
 	return 0;
 }
@@ -409,6 +411,7 @@ const struct sensor_def *probe_sensor(int fd)
 void send_regs(int fd, const struct sensor_def *sensor, const struct sensor_regs *regs, int num_regs)
 {
 	int i;
+    vcos_log_error("send_regs: sensor %s (0x%02X), count %d", sensor->name, sensor->i2c_addr, num_regs);
 	for (i = 0; i < num_regs; i++)
 	{
 		if (regs[i].reg == 0xFFFF)
@@ -420,7 +423,8 @@ void send_regs(int fd, const struct sensor_def *sensor, const struct sensor_regs
 		}
 		else if (regs[i].reg == 0xFFFE)
 		{
-			vcos_sleep(regs[i].data);
+            vcos_log_error("send_regs: delay %u ms", regs[i].data);
+            vcos_sleep(regs[i].data);
 		}
 		else
 		{
@@ -469,6 +473,8 @@ void start_camera_streaming(const struct sensor_def *sensor, struct mode_def *mo
 		vcos_log_error("Failed to set I2C address");
 		return;
 	}
+    vcos_log_error("Starting streaming: mode %dx%d, regs %d (+common %d)",
+                   mode->width, mode->height, mode->num_regs, sensor->num_common_init);
 	if (sensor->common_init)
 		send_regs(fd, sensor, sensor->common_init, sensor->num_common_init);
 	send_regs(fd, sensor, mode->regs, mode->num_regs);
@@ -482,6 +488,7 @@ void stop_camera_streaming(const struct sensor_def *sensor, int fd)
 		vcos_log_error("Failed to set I2C address");
 		return;
 	}
+    vcos_log_error("Stopping streaming");
 	send_regs(fd, sensor, sensor->stop, sensor->num_stop_regs);
 }
 
@@ -566,11 +573,16 @@ static void buffers_to_rawcam(RASPIRAW_CALLBACK_T *dev)
 {
 	MMAL_BUFFER_HEADER_T *buffer;
 
-	while ((buffer = mmal_queue_get(dev->rawcam_pool->queue)) != NULL)
-	{
-		mmal_port_send_buffer(dev->rawcam_output, buffer);
-		// vcos_log_error("Buffer %p to rawcam\n", buffer);
-	}
+    int sent_count = 0;
+    while ((buffer = mmal_queue_get(dev->rawcam_pool->queue)) != NULL)
+    {
+        mmal_port_send_buffer(dev->rawcam_output, buffer);
+        sent_count++;
+    }
+    if (sent_count == 0)
+    {
+        vcos_log_error("buffers_to_rawcam: no buffers available to send");
+    }
 }
 
 static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
@@ -591,10 +603,10 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 			// SD card access is too slow to do much more.
 			FILE *file;
 			char *filename = NULL;
-			if (create_filenames(&filename, cfg->output, count) == MMAL_SUCCESS)
+            if (create_filenames(&filename, cfg->output, count) == MMAL_SUCCESS)
 			{
 				file = fopen(filename, "wb");
-				if (file)
+                if (file)
 				{
 					if (cfg->ptso) // make sure previous
 						       // malloc() was
@@ -602,17 +614,33 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 					{
 						cfg->ptso->idx = count;
 						cfg->ptso->pts = buffer->pts;
-						cfg->ptso->nxt = malloc(sizeof(*cfg->ptso->nxt));
+                        cfg->ptso->nxt = malloc(sizeof(*cfg->ptso->nxt));
+                        if (!cfg->ptso->nxt)
+                        {
+                            vcos_log_error("Failed to allocate pts node");
+                        }
 						cfg->ptso = cfg->ptso->nxt;
 					}
 					if (!cfg->write_empty)
 					{
 						if (cfg->write_header)
-							fwrite(brcm_header, BRCM_RAW_HEADER_LENGTH, 1, file);
-						fwrite(buffer->user_data, buffer->length, 1, file);
+                        {
+                            size_t wrote = fwrite(brcm_header, BRCM_RAW_HEADER_LENGTH, 1, file);
+                            if (wrote != 1)
+                                vcos_log_error("Failed to write header to %s", filename);
+                        }
+                        {
+                            size_t wrote = fwrite(buffer->user_data, buffer->length, 1, file);
+                            if (wrote != 1)
+                                vcos_log_error("Short write of frame to %s (len %u)", filename, (unsigned int)buffer->length);
+                        }
 					}
 					fclose(file);
 				}
+                else
+                {
+                    vcos_log_error("Failed to open output file %s: %s", filename, strerror(errno));
+                }
 				free(filename);
 			}
 		}
@@ -632,10 +660,10 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 	/* Pass the buffers off to any other MMAL sinks. */
 	if (buffer->length && !(buffer->flags & MMAL_BUFFER_HEADER_FLAG_CODECSIDEINFO))
 	{
-		if (dev->isp_ip)
+        if (dev->isp_ip)
 		{
 			MMAL_BUFFER_HEADER_T *out = mmal_queue_get(dev->isp_ip_pool->queue);
-			if (out)
+            if (out)
 			{
 				// vcos_log_error("replicate buffer %p for isp", buffer);
 				mmal_buffer_header_replicate(out, buffer);
@@ -647,6 +675,10 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 						       "%p to isp - %d",
 						       buffer, status);
 			}
+            else
+            {
+                vcos_log_error("callback: no available buffer for ISP input");
+            }
 		}
 
 		/* Pass to the AWB thread */
@@ -679,11 +711,16 @@ static void buffers_to_isp_op(RASPIRAW_ISP_CALLBACK_T *dev)
 {
 	MMAL_BUFFER_HEADER_T *buffer;
 
-	while ((buffer = mmal_queue_get(dev->isp_op_pool->queue)) != NULL)
-	{
-		mmal_port_send_buffer(dev->isp_output, buffer);
-		// vcos_log_error("Buffer %p to isp op\n", buffer);
-	}
+    int sent_count = 0;
+    while ((buffer = mmal_queue_get(dev->isp_op_pool->queue)) != NULL)
+    {
+        mmal_port_send_buffer(dev->isp_output, buffer);
+        sent_count++;
+    }
+    if (sent_count == 0)
+    {
+        vcos_log_error("buffers_to_isp_op: no buffers available to send");
+    }
 }
 
 static void yuv_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
@@ -704,17 +741,23 @@ static void yuv_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 			// SD card access is too slow to do much more.
 			FILE *file;
 			char *filename = NULL;
-			if (create_filenames(&filename, cfg->output_yuv, count) == MMAL_SUCCESS)
+            if (create_filenames(&filename, cfg->output_yuv, count) == MMAL_SUCCESS)
 			{
 				file = fopen(filename, "wb");
-				if (file)
+                if (file)
 				{
 					if (!cfg->write_empty)
 					{
-						fwrite(buffer->user_data, buffer->length, 1, file);
+                        size_t wrote = fwrite(buffer->user_data, buffer->length, 1, file);
+                        if (wrote != 1)
+                            vcos_log_error("Short write of YUV frame to %s (len %u)", filename, (unsigned int)buffer->length);
 					}
 					fclose(file);
 				}
+                else
+                {
+                    vcos_log_error("Failed to open YUV output file %s: %s", filename, strerror(errno));
+                }
 				free(filename);
 			}
 		}
@@ -723,10 +766,10 @@ static void yuv_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 	/* Pass the buffers off to any other MMAL sinks. */
 	if (buffer->length && !(buffer->flags & MMAL_BUFFER_HEADER_FLAG_CODECSIDEINFO))
 	{
-		if (yuv_cb->vr_ip)
+        if (yuv_cb->vr_ip)
 		{
 			MMAL_BUFFER_HEADER_T *out = mmal_queue_get(yuv_cb->vr_ip_pool->queue);
-			if (out)
+            if (out)
 			{
 				// vcos_log_error("replicate buffer %p for vr",
 				// buffer);
@@ -739,6 +782,10 @@ static void yuv_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 						       "render - %d",
 						       buffer, status);
 			}
+            else
+            {
+                vcos_log_error("yuv_callback: no available buffer for video render input");
+            }
 		}
 
 		/* Pass to the processing thread */
@@ -1356,6 +1403,7 @@ static void *awb_thread_task(void *arg)
 	RASPIRAW_CALLBACK_T *dev = (RASPIRAW_CALLBACK_T *)arg;
 	MMAL_BUFFER_HEADER_T *buffer;
 
+    vcos_log_error("AWB thread started");
 	while (!dev->awb_thread_quit)
 	{
 		// Being lazy and using a timed wait instead of setting up a
@@ -1375,6 +1423,7 @@ static void *awb_thread_task(void *arg)
 		buffers_to_rawcam(dev);
 	}
 
+    vcos_log_error("AWB thread exiting");
 	return NULL;
 }
 
@@ -1383,6 +1432,7 @@ static void *processing_thread_task(void *arg)
 	RASPIRAW_CALLBACK_T *dev = (RASPIRAW_CALLBACK_T *)arg;
 	MMAL_BUFFER_HEADER_T *buffer;
 
+    vcos_log_error("Processing thread started");
 	while (!dev->processing_thread_quit)
 	{
 		// Being lazy and using a timed wait instead of setting up a
@@ -1404,6 +1454,7 @@ static void *processing_thread_task(void *arg)
 		buffers_to_rawcam(dev);
 	}
 
+    vcos_log_error("Processing thread exiting");
 	return NULL;
 }
 
@@ -1420,6 +1471,7 @@ static void *processing_yuv_thread_task(void *arg)
 	RASPIRAW_ISP_CALLBACK_T *yuv_cb = (RASPIRAW_ISP_CALLBACK_T *)arg;
 	MMAL_BUFFER_HEADER_T *buffer;
 
+    vcos_log_error("Processing YUV thread started");
 	while (!yuv_cb->processing_yuv_thread_quit)
 	{
 		// Being lazy and using a timed wait instead of setting up a
@@ -1441,6 +1493,7 @@ static void *processing_yuv_thread_task(void *arg)
 		buffers_to_isp_op(yuv_cb);
 	}
 
+    vcos_log_error("Processing YUV thread exiting");
 	return NULL;
 }
 
@@ -1499,10 +1552,15 @@ int main(int argc, char **argv)
 	}
 
 	// Parse the command line and put options in to our status structure
-	if (parse_cmdline(argc, argv, &cfg))
+    if (parse_cmdline(argc, argv, &cfg))
 	{
 		exit(-1);
 	}
+
+    vcos_log_error("Args: mode=%d hflip=%d vflip=%d exposure=%d gain=%d timeout=%d saverate=%d bit_depth=%d cam=%d i2c_bus=%d capture=%d capture_yuv=%d decodemeta=%d awb=%d processing=%d preview=%d fullscreen=%d opacity=%d",
+                   cfg.mode, cfg.hflip, cfg.vflip, cfg.exposure, cfg.gain, cfg.timeout, cfg.saverate, cfg.bit_depth,
+                   cfg.camera_num, cfg.i2c_bus, cfg.capture, cfg.capture_yuv, cfg.decodemetadata, cfg.awb,
+                   cfg.processing, !cfg.no_preview, cfg.fullscreen, cfg.opacity);
 
 	if (cfg.i2c_bus == -1)
 	{
@@ -1528,7 +1586,7 @@ int main(int argc, char **argv)
 
 	printf("Using I2C device %s\n", i2c_device_name);
 
-	sensor = probe_sensor(i2c_fd);
+    sensor = probe_sensor(i2c_fd);
 	if (!sensor)
 	{
 		vcos_log_error("No sensor found. Aborting");
@@ -1540,11 +1598,17 @@ int main(int argc, char **argv)
 		sensor_mode = &sensor->modes[cfg.mode];
 	}
 
-	if (!sensor_mode)
+    if (!sensor_mode)
 	{
 		vcos_log_error("Invalid mode %d - aborting", cfg.mode);
 		return -2;
 	}
+    else
+    {
+        vcos_log_error("Selected sensor %s mode: %dx%d native_bit_depth=%d lanes=%u", sensor->name,
+                       sensor_mode->width, sensor_mode->height, sensor_mode->native_bit_depth,
+                       (unsigned int)sensor_mode->data_lanes);
+    }
 
 	if (cfg.regs)
 	{
@@ -2233,7 +2297,8 @@ int main(int argc, char **argv)
 
 	start_camera_streaming(sensor, sensor_mode, i2c_fd);
 
-	vcos_sleep(cfg.timeout);
+    vcos_log_error("Sleeping for %d ms", cfg.timeout);
+    vcos_sleep(cfg.timeout);
 
 	stop_camera_streaming(sensor, i2c_fd);
 
@@ -2322,6 +2387,7 @@ component_destroy:
 	}
 	close(i2c_fd);
 
+    vcos_log_error("raspiraw exiting cleanly");
 	return 0;
 }
 
