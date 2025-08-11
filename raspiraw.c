@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
@@ -372,7 +373,9 @@ static int i2c_rd(int fd, uint8_t i2c_addr, uint16_t reg, uint8_t *values, uint3
     err = ioctl(fd, I2C_RDWR, &msgset);
     if (err != (int)msgset.nmsgs)
     {
-        vcos_log_error("i2c_rd failed: addr %02X reg %04X len %u err %d", i2c_addr, reg, n, err);
+        int saved_errno = errno;
+        vcos_log_error("i2c_rd failed: addr %02X reg %04X len %u err %d errno %d (%s)",
+                       i2c_addr, reg, n, err, saved_errno, strerror(saved_errno));
         return -1;
     }
 
@@ -389,10 +392,12 @@ const struct sensor_def *probe_sensor(int fd)
 		uint16_t reg = 0;
 		sensor = *sensor_list;
 		vcos_log_error("Probing sensor %s on addr %02X", sensor->name, sensor->i2c_addr);
-		if (sensor->i2c_ident_length <= 2)
+        if (sensor->i2c_ident_length <= 2)
 		{
-			if (!i2c_rd(fd, sensor->i2c_addr, sensor->i2c_ident_reg, (uint8_t *)&reg,
-				    sensor->i2c_ident_length, sensor))
+            vcos_log_error("Attempt ident read: reg 0x%04X len %d expect 0x%04X",
+                           sensor->i2c_ident_reg, sensor->i2c_ident_length, sensor->i2c_ident_value);
+            if (!i2c_rd(fd, sensor->i2c_addr, sensor->i2c_ident_reg, (uint8_t *)&reg,
+                        sensor->i2c_ident_length, sensor))
 			{
 				if (reg == sensor->i2c_ident_value)
 				{
@@ -400,6 +405,11 @@ const struct sensor_def *probe_sensor(int fd)
 						       sensor->i2c_addr);
 					break;
 				}
+                else
+                {
+                    vcos_log_error("Ident mismatch for %s at addr %02X: got 0x%04X, expected 0x%04X",
+                                   sensor->name, sensor->i2c_addr, reg, sensor->i2c_ident_value);
+                }
 			}
 		}
 		sensor_list++;
@@ -545,6 +555,39 @@ void decodemetadataline(uint8_t *data, int bpp)
 			else
 				vcos_log_error("Metadata decode failed %x %x %x", reg, tag, dta);
 		}
+	}
+	else if (data[0] == 0x30)
+	{
+		// Interpret as CSI-2 long packet: [DI | WC(LSB) | WC(MSB) | ECC] [WC bytes payload] [CRC]
+		uint8_t di = data[0];
+		uint8_t vc = di >> 6;
+		uint8_t dt = di & 0x3F;
+		uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
+		uint8_t ecc = data[3];
+
+		vcos_log_error("Custom metadata: DT=0x%02x VC=%u WC=%u ECC=0x%02x", dt, vc, wc, ecc);
+
+		// Print payload bytes in hex (16 bytes per line)
+		const uint8_t *payload = &data[4];
+		unsigned int i = 0;
+		while (i < wc)
+		{
+			unsigned int chunk = wc - i;
+			if (chunk > 16) chunk = 16;
+			char line[128];
+			int pos = snprintf(line, sizeof(line), "DATA[%04u]:", i);
+			for (unsigned int j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
+			{
+				pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[i + j]);
+			}
+			vcos_log_error("%s", line);
+			i += chunk;
+		}
+
+		// Footer: CRC16 over payload (LSB first)
+		const uint8_t *footer = &data[4 + wc];
+		uint16_t crc16 = (uint16_t)footer[0] | ((uint16_t)footer[1] << 8);
+		vcos_log_error("Footer CRC16: 0x%04x (lsb=0x%02x msb=0x%02x)", crc16, footer[0], footer[1]);
 	}
 	else
 		vcos_log_error("Doesn't looks like register set %x!=0x0a", data[0]);
@@ -1564,13 +1607,18 @@ int main(int argc, char **argv)
 
 	if (cfg.i2c_bus == -1)
 	{
-		snprintf(i2c_device_name, sizeof(i2c_device_name), "/dev/i2c-%d", DEFAULT_I2C_DEVICE);
-		i2c_fd = open(i2c_device_name, O_RDWR);
-		if (!i2c_fd)
-		{
-			snprintf(i2c_device_name, sizeof(i2c_device_name), "/dev/i2c-%d", ALT_I2C_DEVICE);
-			i2c_fd = open(i2c_device_name, O_RDWR);
-		}
+        snprintf(i2c_device_name, sizeof(i2c_device_name), "/dev/i2c-%d", DEFAULT_I2C_DEVICE);
+        if (access(i2c_device_name, F_OK) != 0)
+            vcos_log_error("I2C device %s not present", i2c_device_name);
+        i2c_fd = open(i2c_device_name, O_RDWR);
+        if (i2c_fd < 0)
+        {
+            vcos_log_error("Failed to open %s: %s", i2c_device_name, strerror(errno));
+            snprintf(i2c_device_name, sizeof(i2c_device_name), "/dev/i2c-%d", ALT_I2C_DEVICE);
+            if (access(i2c_device_name, F_OK) != 0)
+                vcos_log_error("I2C device %s not present", i2c_device_name);
+            i2c_fd = open(i2c_device_name, O_RDWR);
+        }
 	}
 	else
 	{
@@ -1578,13 +1626,13 @@ int main(int argc, char **argv)
 		i2c_fd = open(i2c_device_name, O_RDWR);
 	}
 
-	if (!i2c_fd)
+    if (i2c_fd < 0)
 	{
-		printf("Failed to open I2C device %s\n", i2c_device_name);
+        printf("Failed to open I2C device %s: %s\n", i2c_device_name, strerror(errno));
 		return -1;
 	}
 
-	printf("Using I2C device %s\n", i2c_device_name);
+    printf("Using I2C device %s (fd=%d)\n", i2c_device_name, i2c_fd);
 
     sensor = probe_sensor(i2c_fd);
 	if (!sensor)
