@@ -590,7 +590,22 @@ void decodemetadataline(uint8_t *data, int bpp)
 		vcos_log_error("Footer CRC16: 0x%04x (lsb=0x%02x msb=0x%02x)", crc16, footer[0], footer[1]);
 	}
 	else
-		vcos_log_error("Doesn't looks like register set %x!=0x0a", data[0]);
+	{
+		uint8_t di = data[0];
+		uint8_t vc = di >> 6;
+		uint8_t dt = di & 0x3F;
+		uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
+		uint8_t ecc = data[3];
+		vcos_log_error("Unexpected metadata header: DI=0x%02x (VC=%u DT=0x%02x) bpp=%d", di, vc, dt, bpp);
+		vcos_log_error("Heuristic header fields: WC=%u ECC=0x%02x", wc, ecc);
+		char line[128];
+		int pos = snprintf(line, sizeof(line), "Bytes[0..7]:");
+		for (unsigned int j = 0; j < 8 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		{
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", data[j]);
+		}
+		vcos_log_error("%s", line);
+	}
 }
 
 int encoding_to_bpp(uint32_t encoding)
