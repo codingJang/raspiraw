@@ -1,0 +1,418 @@
+Using I2C device /dev/i2c-10 (fd=4)
+No AWB
+sure=-1 gain=-1 timeout=1000 saverate=1 bit_depth=-1 cam=-1 i2c_bus=-1 capture=1 capture_yuv=0 decodemeta=1 awb=0 processing=0 preview=1 fullscreen=1 opacity=255
+RaspiRaw: Probing sensor ov5647 on addr 36
+RaspiRaw: Attempt ident read: reg 0x300A len 2 expect 0x4756
+RaspiRaw: i2c_rd failed: addr 36 reg 300A len 2 err -1 errno 121 (Remote I/O error)
+RaspiRaw: Probing sensor imx219 on addr 10
+RaspiRaw: Attempt ident read: reg 0x0000 len 2 expect 0x1902
+RaspiRaw: Found sensor imx219 at address 10
+RaspiRaw: Selected sensor imx219 mode: 1640x1232 native_bit_depth=10 lanes=2
+RaspiRaw: Encoding 41414270
+mmal: Set pack to 0, unpack to 0
+mmal: Timing 6/2, 2/6/0, 0/0
+mmal: Create pool of 6 buffers of size 2562560
+mmal: Create pool of 6 buffers of size 2562560
+mmal: Starting streaming: mode 1640x1232, regs 60 (+common 0)
+mmal: send_regs: sensor imx219 (0x10), count 60
+mmal: Now streaming...
+mmal: Sleeping for 1000 ms
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 4c 10 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 49 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 11 10 10 10 b4 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 94 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 10 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 98 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 89 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 8b 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 8b 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 89 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 11 10 10 10 a8 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 8b 10 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 87 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 11 10 10 10 b5 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 cb 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 8f 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 87 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 8c 10 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 98 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 87 10 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 10 10 10 10 bf 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 8a 10 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 d8 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 11 10 10 10 b8 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 88 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x10 (VC=0 DT=0x10) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 10 10 11 10 4f 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4368 ECC=0x10
+mmal: Bytes[0..7]: 11 10 11 10 98 11 10 11
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: buffers_to_rawcam: no buffers available to send
+mmal: First metadata line
+mmal: Unexpected metadata header: DI=0x00 (VC=0 DT=0x00) bpp=10
+mmal: Heuristic header fields: WC=0 ECC=0x00
+mmal: Bytes[0..7]: 00 00 00 00 00 00 00 00
+mmal: Second metadata line
+mmal: Unexpected metadata header: DI=0x11 (VC=0 DT=0x11) bpp=10
+mmal: Heuristic header fields: WC=4112 ECC=0x10
+mmal: Bytes[0..7]: 11 10 10 10 f8 11 10 10
+mmal: buffers_to_isp_op: no buffers available to send
+mmal: Stopping streaming
+mmal: send_regs: sensor imx219 (0x10), count 1
+mmal: Short write of frame to /dev/shm/out.0040.raw (len 0)
+mmal: Short write of frame to /dev/shm/out.0041.raw (len 0)
+mmal: Short write of frame to /dev/shm/out.0042.raw (len 0)
+mmal: Short write of frame to /dev/shm/out.0043.raw (len 0)
+mmal: Short write of frame to /dev/shm/out.0044.raw (len 0)
+mmal: Short write of frame to /dev/shm/out.0045.raw (len 0)
+mmal: raspiraw exiting cleanly
