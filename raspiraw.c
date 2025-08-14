@@ -556,48 +556,39 @@ void decodemetadataline(uint8_t *data, int bpp)
 				vcos_log_error("Metadata decode failed %x %x %x", reg, tag, dta);
 		}
 	}
-	else if (data[0] == 0x30)
-	{
-		// Interpret as CSI-2 long packet: [DI | WC(LSB) | WC(MSB) | ECC] [WC bytes payload] [CRC]
-		uint8_t di = data[0];
-		uint8_t vc = di >> 6;
-		uint8_t dt = di & 0x3F;
-		uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
-		uint8_t ecc = data[3];
+    else if (data[0] == 0x2b)
+    {
+        // Custom metadata format:
+        // [0] = 0x2B (format code)
+        // [1..2] = Word Count (LSB first)
+        // [3..(3+WC-1)] = payload bytes
+        uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
 
-		vcos_log_error("Custom metadata: DT=0x%02x VC=%u WC=%u ECC=0x%02x", dt, vc, wc, ecc);
+        vcos_log_error("Custom metadata 0x2B: WC=%u", wc);
 
-		// Print payload bytes in hex (16 bytes per line)
-		const uint8_t *payload = &data[4];
-		unsigned int i = 0;
-		while (i < wc)
-		{
-			unsigned int chunk = wc - i;
-			if (chunk > 16) chunk = 16;
-			char line[128];
-			int pos = snprintf(line, sizeof(line), "DATA[%04u]:", i);
-			for (unsigned int j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
-			{
-				pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[i + j]);
-			}
-			vcos_log_error("%s", line);
-			i += chunk;
-		}
-
-		// Footer: CRC16 over payload (LSB first)
-		const uint8_t *footer = &data[4 + wc];
-		uint16_t crc16 = (uint16_t)footer[0] | ((uint16_t)footer[1] << 8);
-		vcos_log_error("Footer CRC16: 0x%04x (lsb=0x%02x msb=0x%02x)", crc16, footer[0], footer[1]);
-	}
+        // Print payload bytes in hex (16 bytes per line)
+        const uint8_t *payload = &data[3];
+        unsigned int i = 0;
+        while (i < wc)
+        {
+            unsigned int chunk = wc - i;
+            if (chunk > 16) chunk = 16;
+            char line[128];
+            int pos = snprintf(line, sizeof(line), "DATA[%04u]:", i);
+            for (unsigned int j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
+            {
+                pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[i + j]);
+            }
+            vcos_log_error("%s", line);
+            i += chunk;
+        }
+    }
 	else
 	{
-		uint8_t di = data[0];
-		uint8_t vc = di >> 6;
-		uint8_t dt = di & 0x3F;
-		uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
-		uint8_t ecc = data[3];
-		vcos_log_error("Unexpected metadata header: DI=0x%02x (VC=%u DT=0x%02x) bpp=%d", di, vc, dt, bpp);
-		vcos_log_error("Heuristic header fields: WC=%u ECC=0x%02x", wc, ecc);
+        uint8_t fmt = data[0];
+        uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
+        vcos_log_error("Unexpected metadata format: code=0x%02x bpp=%d", fmt, bpp);
+        vcos_log_error("Heuristic fields: WC=%u", wc);
 		char line[128];
 		int pos = snprintf(line, sizeof(line), "Bytes[0..7]:");
 		for (unsigned int j = 0; j < 8 && pos > 0 && (size_t)pos < sizeof(line); ++j)
