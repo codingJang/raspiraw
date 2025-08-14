@@ -556,7 +556,7 @@ void decodemetadataline(uint8_t *data, int bpp)
 				vcos_log_error("Metadata decode failed %x %x %x", reg, tag, dta);
 		}
 	}
-    else if (data[0] == 0x2b)
+    else if (data[0] == 0x0b)
     {
         // Custom metadata format:
         // [0] = 0x2B (format code)
