@@ -526,6 +526,45 @@ MMAL_STATUS_T create_filenames(char **finalName, char *pattern, int frame)
 	return MMAL_SUCCESS;
 }
 
+static void dump_buffer_hex(const char *label, const uint8_t *data, size_t len)
+{
+	// Hex + ASCII dump, 16 bytes per line
+	size_t i = 0;
+	while (i < len)
+	{
+		size_t chunk = len - i;
+		if (chunk > 16)
+			chunk = 16;
+		char line[160];
+		int pos = snprintf(line, sizeof(line), "%s[%08x]:", label, (unsigned int)i);
+		for (size_t j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		{
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", data[i + j]);
+		}
+		// pad hex area if last line shorter than 16 bytes
+		for (size_t j = chunk; j < 16 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, "   ");
+		pos += snprintf(line + pos, sizeof(line) - (size_t)pos, "  |");
+		for (size_t j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		{
+			unsigned char c = data[i + j];
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, "%c", (c >= 32 && c <= 126) ? c : '.');
+		}
+		// pad ascii area if last line shorter than 16 bytes
+		for (size_t j = chunk; j < 16 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, ".");
+		pos += snprintf(line + pos, sizeof(line) - (size_t)pos, "|");
+		vcos_log_error("%s", line);
+		i += chunk;
+	}
+}
+
+static void dump_tail_bytes(const uint8_t *data, size_t offset, size_t len)
+{
+	vcos_log_error("Tail region: offset=0x%08x len=%u", (unsigned int)offset, (unsigned int)len);
+	dump_buffer_hex("TAIL", data + offset, len);
+}
+
 void decodemetadataline(uint8_t *data, int bpp)
 {
 	int c = 1;
@@ -559,12 +598,12 @@ void decodemetadataline(uint8_t *data, int bpp)
     else if (data[0] == 0x0b)
     {
         // Custom metadata format:
-        // [0] = 0x2B (format code)
+        // [0] = 0x0B (format code)
         // [1..2] = Word Count (LSB first)
         // [3..(3+WC-1)] = payload bytes
         uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
 
-        vcos_log_error("Custom metadata 0x2B: WC=%u", wc);
+        vcos_log_error("Custom metadata 0x0B: WC=%u", wc);
 
         // Print payload bytes in hex (16 bytes per line)
         const uint8_t *payload = &data[3];
@@ -699,11 +738,32 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 	{
 		int bpp = encoding_to_bpp(port->format->encoding);
 		int pitch = mmal_encoding_width_to_stride(port->format->encoding, port->format->es->video.width);
+		unsigned int w = port->format->es->video.width;
+		unsigned int h = port->format->es->video.height;
+		size_t len = buffer->length;
+		size_t lines = pitch ? (len / (size_t)pitch) : 0;
+		size_t tail = (pitch && len >= (lines * (size_t)pitch)) ? (len - (lines * (size_t)pitch)) : 0;
 
-		vcos_log_error("First metadata line");
-		decodemetadataline(buffer->user_data, bpp);
-		vcos_log_error("Second metadata line");
-		decodemetadataline(buffer->user_data + pitch, bpp);
+		vcos_log_error("Sideinfo summary: len=%u pitch=%d w=%u h=%u bpp=%d encoding=%08X pts=%lld flags=%04X",
+			       (unsigned int)len, pitch, w, h, bpp, port->format->encoding, (long long)buffer->pts,
+			       buffer->flags);
+		vcos_log_error("Dumping entire sideinfo buffer (%u bytes)", (unsigned int)len);
+		dump_buffer_hex("SI", (const uint8_t *)buffer->user_data, len);
+
+		if (lines > 0)
+		{
+			for (size_t i = 0; i < lines; ++i)
+			{
+				vcos_log_error("Decode metadata line %u/%u (offset=0x%08x)", (unsigned int)(i + 1),
+					       (unsigned int)lines, (unsigned int)(i * (size_t)pitch));
+				decodemetadataline((uint8_t *)buffer->user_data + i * (size_t)pitch, bpp);
+			}
+		}
+
+		if (tail > 0)
+		{
+			dump_tail_bytes((const uint8_t *)buffer->user_data, lines * (size_t)pitch, tail);
+		}
 	}
 
 	/* Pass the buffers off to any other MMAL sinks. */
