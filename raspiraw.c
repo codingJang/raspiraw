@@ -528,6 +528,15 @@ MMAL_STATUS_T create_filenames(char **finalName, char *pattern, int frame)
 
 static void dump_buffer_hex(const char *label, const uint8_t *data, size_t len)
 {
+    // Detect the sequence 0x0b 0x00 0x10 anywhere in the buffer and emit a message once.
+    for (size_t idx = 0; idx + 2 < len; ++idx)
+    {
+        if (data[idx] == 0x0b && data[idx + 1] == 0x00 && data[idx + 2] == 0x10)
+        {
+            vcos_log_error("FOUND SOMETHING NEAT!");
+            break;
+        }
+    }
 	// Hex + ASCII dump, 16 bytes per line
 	size_t i = 0;
 	while (i < len)
@@ -561,6 +570,13 @@ static void dump_buffer_hex(const char *label, const uint8_t *data, size_t len)
 
 static void dump_tail_bytes(const uint8_t *data, size_t offset, size_t len)
 {
+    vcos_log_error("Tail region: offset=0x%08x len=%u", (unsigned int)offset, (unsigned int)len);
+    // If the tail starts with the special sequence 0x0b 0x00 0x10, highlight it.
+    const uint8_t *tail = data + offset;
+    if (len >= 3 && tail[0] == 0x0b && tail[1] == 0x00 && tail[2] == 0x10)
+    {
+        vcos_log_error("CONGRATULATIONS!");
+    }
 	vcos_log_error("Tail region: offset=0x%08x len=%u", (unsigned int)offset, (unsigned int)len);
 	dump_buffer_hex("TAIL", data + offset, len);
 }
