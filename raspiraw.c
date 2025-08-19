@@ -536,11 +536,11 @@ static void dump_buffer_hex(const char *label, const uint8_t *data, size_t len)
             vcos_log_error("FOUND SOMETHING NEAT!");
             break;
         }
-+        else if (data[idx] == 0x10 && data[idx + 1] == 0x00 && data[idx + 2] == 0x0b)
-+        {
-+            vcos_log_error("FOUND SOMETHING FLIPPED!");
-+            break;
-+        }
+        else if (data[idx] == 0x10 && data[idx + 1] == 0x00 && data[idx + 2] == 0x0b)
+        {
+            vcos_log_error("FOUND SOMETHING FLIPPED!");
+            break;
+        }
     }
 	// Hex + ASCII dump, 16 bytes per line
 	size_t i = 0;
@@ -582,10 +582,10 @@ static void dump_tail_bytes(const uint8_t *data, size_t offset, size_t len)
     {
         vcos_log_error("CONGRATULATIONS!");
     }
-+    else if (len >= 3 && tail[0] == 0x10 && tail[1] == 0x00 && tail[2] == 0x0b)
-+    {
-+        vcos_log_error("FLIPPED SEQUENCE ARRIVED INSIDE TAIL!");
-+    }
+    else if (len >= 3 && tail[0] == 0x10 && tail[1] == 0x00 && tail[2] == 0x0b)
+    {
+        vcos_log_error("FLIPPED SEQUENCE ARRIVED INSIDE TAIL!");
+    }
 	vcos_log_error("Tail region: offset=0x%08x len=%u", (unsigned int)offset, (unsigned int)len);
 	dump_buffer_hex("TAIL", data + offset, len);
 }
