@@ -566,8 +566,8 @@ void decodemetadataline(uint8_t *data, int bpp)
 	{
         vcos_log_error("Unexpected metadata 0x%02x", data[0]);
 		char line[128];
-		int pos = snprintf(line, sizeof(line), "Bytes[0..15]:");
-		for (unsigned int j = 0; j < 16 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		int pos = snprintf(line, sizeof(line), "Bytes[0..31]:");
+		for (unsigned int j = 0; j < 32 && pos > 0 && (size_t)pos < sizeof(line); ++j)
 		{
 			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", data[j]);
 		}
