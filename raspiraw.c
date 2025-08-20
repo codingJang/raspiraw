@@ -517,7 +517,7 @@ void decodemetadataline(uint8_t *data, int bpp)
 
 	if (data[0] == 0x0a)
 	{
-
+		vcos_log_error("Metadata line 0x0A");
 		while (data[c] != 0x07)
 		{
 			tag = data[c++];
@@ -539,8 +539,43 @@ void decodemetadataline(uint8_t *data, int bpp)
 				vcos_log_error("Metadata decode failed %x %x %x", reg, tag, dta);
 		}
 	}
+    else if (data[0] == 0x0b)
+    {
+        // Custom metadata format:
+        // [0] = 0x0B (format code)
+        // [1..2] = Word Count (LSB first)
+        // [3..(3+WC-1)] = payload bytes
+        uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
+
+        vcos_log_error("Custom metadata 0x0B: WC=%u", wc);
+
+        // Limit output to maximum 16 bytes
+        const uint8_t *payload = &data[3];
+        unsigned int max_bytes = wc < 16 ? wc : 16;
+        char line[128];
+        int pos = snprintf(line, sizeof(line), "DATA[0..%u]:", max_bytes ? (max_bytes-1) : 0);
+        for (unsigned int j = 0; j < max_bytes && pos > 0 && (size_t)pos < sizeof(line); ++j)
+        {
+            pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[j]);
+        }
+        vcos_log_error("%s", line);
+        if (wc > 16)
+            vcos_log_error("... (truncated, total %u bytes)", wc);
+    }
 	else
-		vcos_log_error("Doesn't looks like register set %x!=0x0a", data[0]);
+	{
+        uint8_t fmt = data[0];
+        uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
+        vcos_log_error("Unexpected metadata format: code=0x%02x bpp=%d", fmt, bpp);
+        vcos_log_error("Heuristic fields: WC=%u", wc);
+		char line[128];
+		int pos = snprintf(line, sizeof(line), "Bytes[0..7]:");
+		for (unsigned int j = 0; j < 8 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		{
+			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", data[j]);
+		}
+		vcos_log_error("%s", line);
+	}
 }
 
 int encoding_to_bpp(uint32_t encoding)
