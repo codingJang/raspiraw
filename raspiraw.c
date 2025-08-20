@@ -534,7 +534,7 @@ void decodemetadataline(uint8_t *data, int bpp)
 
 	if (data[0] == 0x0a)
 	{
-
+		vcos_log_error("Metadata line 0x0A");
 		while (data[c] != 0x07)
 		{
 			tag = data[c++];
@@ -564,7 +564,7 @@ void decodemetadataline(uint8_t *data, int bpp)
         // [3..(3+WC-1)] = payload bytes
         uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
 
-        vcos_log_error("Custom metadata 0x2B: WC=%u", wc);
+        vcos_log_error("Custom metadata 0x0B: WC=%u", wc);
 
         // Print payload bytes in hex (16 bytes per line)
         const uint8_t *payload = &data[3];
