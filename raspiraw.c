@@ -566,22 +566,18 @@ void decodemetadataline(uint8_t *data, int bpp)
 
         vcos_log_error("Custom metadata 0x0B: WC=%u", wc);
 
-        // Print payload bytes in hex (16 bytes per line)
+        // Limit output to maximum 16 bytes
         const uint8_t *payload = &data[3];
-        unsigned int i = 0;
-        while (i < wc)
+        unsigned int max_bytes = wc < 16 ? wc : 16;
+        char line[128];
+        int pos = snprintf(line, sizeof(line), "DATA[0..%u]:", max_bytes ? (max_bytes-1) : 0);
+        for (unsigned int j = 0; j < max_bytes && pos > 0 && (size_t)pos < sizeof(line); ++j)
         {
-            unsigned int chunk = wc - i;
-            if (chunk > 16) chunk = 16;
-            char line[128];
-            int pos = snprintf(line, sizeof(line), "DATA[%04u]:", i);
-            for (unsigned int j = 0; j < chunk && pos > 0 && (size_t)pos < sizeof(line); ++j)
-            {
-                pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[i + j]);
-            }
-            vcos_log_error("%s", line);
-            i += chunk;
+            pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", payload[j]);
         }
+        vcos_log_error("%s", line);
+        if (wc > 16)
+            vcos_log_error("... (truncated, total %u bytes)", wc);
     }
 	else
 	{
