@@ -559,7 +559,7 @@ void decodemetadataline(uint8_t *data, int bpp)
     else if (data[0] == 0x0b)
     {
         // Custom metadata format:
-        // [0] = 0x2B (format code)
+        // [0] = 0x0B (format code)
         // [1..2] = Word Count (LSB first)
         // [3..(3+WC-1)] = payload bytes
         uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
@@ -704,6 +704,8 @@ static void callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 		decodemetadataline(buffer->user_data, bpp);
 		vcos_log_error("Second metadata line");
 		decodemetadataline(buffer->user_data + pitch, bpp);
+		vcos_log_error("Third metadata line");
+		decodemetadataline(buffer->user_data + 2 * pitch, bpp);
 	}
 
 	/* Pass the buffers off to any other MMAL sinks. */
