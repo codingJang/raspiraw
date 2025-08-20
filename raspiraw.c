@@ -581,13 +581,10 @@ void decodemetadataline(uint8_t *data, int bpp)
     }
 	else
 	{
-        uint8_t fmt = data[0];
-        uint16_t wc = (uint16_t)data[1] | ((uint16_t)data[2] << 8);
-        vcos_log_error("Unexpected metadata format: code=0x%02x bpp=%d", fmt, bpp);
-        vcos_log_error("Heuristic fields: WC=%u", wc);
+        vcos_log_error("Unexpected metadata 0x%02x", data[0]);
 		char line[128];
-		int pos = snprintf(line, sizeof(line), "Bytes[0..7]:");
-		for (unsigned int j = 0; j < 8 && pos > 0 && (size_t)pos < sizeof(line); ++j)
+		int pos = snprintf(line, sizeof(line), "Bytes[0..15]:");
+		for (unsigned int j = 0; j < 16 && pos > 0 && (size_t)pos < sizeof(line); ++j)
 		{
 			pos += snprintf(line + pos, sizeof(line) - (size_t)pos, " %02x", data[j]);
 		}
